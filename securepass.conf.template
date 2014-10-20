@@ -1,0 +1,16 @@
+#/etc/securepass.conf
+#
+# DEBUG: writes to syslog - 0 ==> no debug, from 1 to 4 ==> debug level
+# DEBUG_STDERR: writes to stderr - 0 ==> no debug, from 1 to 4 ==> debug level
+# SP_URL example: https://beta.secure-pass.net/api/v1
+# SP_REALM example: wiran.net
+#
+[default]
+DEBUG = 0
+DEBUG_STDERR = 0
+APP_ID = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+APP_SECRET = BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+SP_URL = myurl
+
+[nss]
+SP_REALM= myrealm

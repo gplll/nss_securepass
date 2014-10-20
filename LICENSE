@@ -1,0 +1,5 @@
+Files jsmn.c, jsmn.h are licensed under the MIT License - see file LICENSE_MIT
+
+Files minGlue.h, minIni.c, minIni.h, test_ini.c are licensed under the Apache 2.0 License - see file LICENSE_APACHE2
+
+The remaining files are licensed under the GNU GENERAL PUBLIC LICENSE - see file LICENSE_GNUGPL

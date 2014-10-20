@@ -1,0 +1,83 @@
+CC=@CC@
+LDFLAGS+=-shared -Wl,-Bdynamic @LDFLAGS@
+LIBS+=@LIBS@
+CFLAGS+=-I. -g @CPPFLAGS@ @CFLAGS@
+INSTALL=@INSTALL@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+
+#Set a few distribution variables
+DISTNAME=@PACKAGE_NAME@-@PACKAGE_VERSION@
+DISTDIR=${DISTNAME}
+DISTBALL=${DISTNAME}.tgz
+
+LIBSP_SRCS=sp_api.c jsmn.c minIni.c
+LIBSP_OBJS=sp_api.o jsmn.o minIni.o
+SRCS=nss_sp.c
+OBJS=nss_sp.o
+HDRS=nss_sp.h sp_api.h jsmn.h minIni.h minGlue.h
+TEST_INI_SRCS=test_ini.c
+TEST_INI_OBJS=test_ini.o
+SP_CLIENT_SRCS=sp_client.c
+SP_CLIENT_OBJS=sp_client.o
+NSS_CLIENT_SRCS=nss_client.c
+NSS_CLIENT_OBJS=nss_client.o
+LIBSP=libsp.a
+LIBNSS_SP=libnss_sp.so.2
+LIBNSS_SP_SO=libnss_sp.so
+TEST_INI=test_ini
+SP_CLIENT=sp_client
+NSS_CLIENT=nss_client
+#BASEFILES represents all *source* files, in the truest sense (no auto* artifacts)
+BASEFILES=$(LIBSP_SRCS) $(SRCS) $(HDRS) $(TEST_INI_SRCS) $(SP_CLIENT_SRCS) $(NSS_CLIENT_SRCS) \
+          Makefile.in configure.ac install-sh config.sub config.guess \
+          securepass.conf.template ADD_USERS.sh DEL_USERS.sh DO_TEST.sh test.ini \
+          README.md LICENSE LICENSE_GNUGPL LICENSE_MIT LICENSE_APACHE2
+
+#DISTFILES represents all distributable files, including auto* artifacts and BASEFILES
+DISTFILES=configure ${BASEFILES}
+
+%.o: %.c $(HDRS) 
+	$(CC) -c $(CFLAGS) $< -o $@
+
+all: $(LIBSP) $(LIBNSS_SP) $(TEST_INI) $(SP_CLIENT) $(NSS_CLIENT_OBJS)
+ 
+$(LIBSP): $(LIBSP_OBJS)
+	$(AR) -crus $(LIBSP) $(LIBSP_OBJS)
+
+$(LIBNSS_SP): $(LIBSP) $(OBJS)
+	$(CC) $(LDFLAGS) -o $(LIBNSS_SP) $(OBJS) $(LIBSP) $(LIBS)
+
+$(TEST_INI): $(TEST_INI_OBJS) $(LIBSP)
+	$(CC) -o $(TEST_INI) $(TEST_INI_OBJS) $(LIBSP)
+
+$(NSS_CLIENT): $(NSS_CLIENT_OBJS) $(LIBSP)
+	$(CC) -o $(NSS_CLIENT) $(NSS_CLIENT_OBJS) $(LIBS) -lnss_sp -lpthread
+
+$(SP_CLIENT): $(SP_CLIENT_OBJS) $(LIBSP)
+	$(CC) -o $(SP_CLIENT) $(SP_CLIENT_OBJS) $(LIBSP) $(LIBS)
+
+install: $(LIBNSS_SP)
+	$(INSTALL) -o root -g root $(LIBNSS_SP) $(libdir)/$(LIBNSS_SP) 
+	ln -sf $(libdir)/$(LIBNSS_SP) $(libdir)/$(LIBNSS_SP_SO)
+	$(CC) -o $(NSS_CLIENT) $(NSS_CLIENT_OBJS) $(LIBS) -lnss_sp -lpthread
+
+clean:
+	rm -f $(LIBSP) $(LIBNSS_SP) $(TEST_INI) $(SP_CLIENT) $(NSS_CLIENT) $(LIBSP_OBJS) $(OBJS) $(TEST_INI_OBJS) \
+          $(SP_CLIENT_OBJS) $(NSS_CLIENT_OBJS)
+	rm -f $(libdir)/$(LIBNSS_SP) $(libdir)/$(LIBNSS_SP_SO)
+	rm -f ${DISTDIR}/* ${DISTBALL}
+
+distclean: clean
+	rm -rf Makefile 
+
+baseclean: distclean
+	rm -rf configure
+	
+dist: ${DISTBALL}
+
+${DISTBALL}:
+	rm -f ${DISTBALL}
+	mkdir -p ${DISTDIR}
+	cp --parents ${DISTFILES} ${DISTDIR}
+	tar -czvf ${DISTBALL} ${DISTDIR}
