@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.69])
+AC_PREREQ([2.63])
 AC_INIT([nss_securepass], [1.0.0.0])
 AC_CANONICAL_HOST
 #AC_PREFIX_DEFAULT()

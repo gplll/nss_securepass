@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <malloc.h>
+#include <ctype.h>
 #include <string.h>
 #include <syslog.h>
 #include <pthread.h>
@@ -31,7 +32,7 @@
      ((strlen(s) == (t).end - (t).start) \
      && (strncmp(js+(t).start, s, (t).end - (t).start) == 0))
      
-struct sp_config sp_config ={SP_NOT_INITED, 0, 0, "", "", "", ""};
+struct sp_config sp_config ={SP_NOT_INITED, 0, 0, "", "", "", "", "", "", ""};
 
 struct MemoryStruct {
   char *memory;
@@ -39,10 +40,19 @@ struct MemoryStruct {
 };
 int param_count = 0; /* number of parameters read from config file */
 char *types[] = {"PRIMITIVE", "OBJECT","ARRAY","STRING"};
-char *post_data=NULL;
  
+/*
+ * checks a key/value found in config file and fills the output variable adding a prefix and postfic
+ * key: key found in config file (eg. APP_IP)
+ * value: value associated to key into config file
+ * key_to_chk: value is copied if key_to_chk and key match
+ * result: output variable - is mallocated() within this function
+ * prefix: string to be prefixed to value
+ * postfix: string to be postfixed to value 
+ * mandatory: param is mandadotory, increment param_count global variable
+ */
 void check_ini_string (const char *key, const char *value, const char *key_to_chk, char **result, 
-						char *prefix, char *postfix) {
+						char *prefix, char *postfix, int mandatory) {
 
 		int pre_len = 0, post_len = 0;
 		if (strcmp (key, key_to_chk) == 0) {
@@ -64,33 +74,46 @@ void check_ini_string (const char *key, const char *value, const char *key_to_ch
 			if (postfix != NULL) {
 				strcat (*result, postfix);
 			}
-			param_count++;
+			if (mandatory)
+				param_count++;
 		}
 }
 
 int IniCallback(const char *section, const char *key, const char *value, const void *userdata)
 {
-	if ((strcmp (key, "APP_ID") == 0) || (strcmp (key, "APP_SECRET") == 0)) {
-		debug (2, "IniCallback:    [%s] %s=****************", section, key);
+	/* copy key to local variable and force lower case */
+	char key1[strlen(key) + 1];
+	strcpy (key1, key);
+	char *k = key1;
+	int i = 0;
+	for (; key1[i]; i++){
+		  key1[i] = tolower(key1[i]);
+	}
+
+	if ((strcmp (k, "app_id") == 0) || (strcmp (k, "app_secret") == 0)) {
+		debug (2, "IniCallback:    [%s] %s=****************", section, k);
 	} 
 	else {
-		debug (2, "IniCallback:    [%s] %s=%s", section, key, value);
+		debug (2, "IniCallback:    [%s] %s=%s", section, k, value);
 	}
 	if (strcmp (section, "default") == 0) {
-		check_ini_string (key, value, "APP_ID", &sp_config.app_id, "X-SecurePass-App-ID:", NULL);
-		check_ini_string (key, value, "APP_SECRET", &sp_config.app_secret, "X-SecurePass-App-Secret:", NULL);
-		check_ini_string (key, value, "SP_URL", &sp_config.URL_u_list, NULL, "/users/list");
-		check_ini_string (key, value, "SP_URL", &sp_config.URL_u_info, NULL, "/users/info");
-		check_ini_string (key, value, "SP_URL", &sp_config.URL_u_x_list, NULL, "/users/xattrs/list");
-		if (strcmp (key, "DEBUG") == 0) {
+		check_ini_string (k, value, "app_id", &sp_config.app_id, "X-SecurePass-App-ID:", NULL, 1);
+		check_ini_string (k, value, "app_secret", &sp_config.app_secret, "X-SecurePass-App-Secret:", NULL, 1);
+		check_ini_string (k, value, "endpoint", &sp_config.URL_u_list, NULL, "/api/v1/users/list", 1);
+		check_ini_string (k, value, "endpoint", &sp_config.URL_u_info, NULL, "/api/v1/users/info", 1);
+		check_ini_string (k, value, "endpoint", &sp_config.URL_u_x_list, NULL, "/api/v1/users/xattrs/list", 1);
+		if (strcmp (k, "debug") == 0) {
 			sp_config.debug = atoi (value);
 		}
-		if (strcmp (key, "DEBUG_STDERR") == 0) {
+		if (strcmp (k, "debug_stderr") == 0) {
 			sp_config.debug_stderr = atoi (value);
 		}
 	}
 	if (strcmp (section, "nss") == 0) {
-		check_ini_string (key, value, "SP_REALM", &sp_config.realm, NULL, NULL);
+		check_ini_string (k, value, "default_realm", &sp_config.default_realm, NULL, NULL, 1);
+		check_ini_string (k, value, "default_gid", &sp_config.default_gid, NULL, NULL, 0);
+		check_ini_string (k, value, "default_home", &sp_config.default_home, NULL, "/", 0);
+		check_ini_string (k, value, "default_shell", &sp_config.default_shell, NULL, NULL, 0);
 	}
   return 1;
 }
@@ -377,12 +400,12 @@ static int do_curl (const char *url, char *post_data, jsmntok_t **tok, struct Me
  * xattrs: pointer to a sp_xattrs_t that will be allocated by this function
  * caller will free() the structure after use
  * username: specifies the username in SecurePass format, i.e. user@realm
+ * get_defaults: when no value, get default values from config file
  */
-int sp_xattrs (sp_xattrs_t **xattrs, char *sp_username) {
+int sp_xattrs (sp_xattrs_t **xattrs, char *sp_username, int get_defaults) {
 	int len;
 	jsmntok_t *tok;
 	struct MemoryStruct chunk;
-	char *post_data;
 
 	debug (4, "==> sp_xattrs");
 	if ((sp_config.status != SP_INITED)) {
@@ -392,14 +415,11 @@ int sp_xattrs (sp_xattrs_t **xattrs, char *sp_username) {
 		error ("sp_xattrs() called with username=NULL");
 		return -1;
 	}
+
 	/* call curl */
-	if ((post_data = malloc (strlen ("USERNAME=") + strlen (sp_username) + 1)) == NULL) {
-		error ("malloc() failed");
-		return -1;
-	}
+	char post_data[(strlen ("USERNAME=") + strlen (sp_username) + 1)];
 	sprintf (post_data, "%s%s", "USERNAME=", sp_username);
 	len = do_curl(sp_config.URL_u_x_list, post_data, &tok, (struct MemoryStruct *) &chunk);
-	free (post_data);
 	if (len == -1) {
 		return -1;
 	}
@@ -424,6 +444,27 @@ int sp_xattrs (sp_xattrs_t **xattrs, char *sp_username) {
 	}
 	cp_tok.offset = sizeof (sp_xattrs_t); 
 	cp_tok.status = 0; /* status = OK */ 
+
+	/* prepare default values */
+	char *def_gid;
+	char *def_home;
+	char *def_shell;
+	int l1 = strlen (sp_config.default_home);
+	int l2 = strlen (strtok (sp_username, "@"));
+	char home [(l1 + l2 + 1)];
+	if (get_defaults) {
+		def_gid = sp_config.default_gid;	
+
+		def_home = home;
+		sp_username[l2] = 0;
+		strcat ((strcpy (home, sp_config.default_home)), sp_username);
+		sp_username[l2] = '@';
+
+		def_shell = sp_config.default_shell;	
+	}
+	else {
+		def_gid = def_home = def_shell = "";
+	}
 	while (1) {
 		*xattrs = (sp_xattrs_t *) cp_tok.buf;
 
@@ -432,16 +473,16 @@ int sp_xattrs (sp_xattrs_t **xattrs, char *sp_username) {
 		copy_tok (chunk.memory, tok, len, &cp_tok, "posixuid", "");
 
 		(*xattrs)->posixgid = cp_tok.buf + cp_tok.offset;
-		copy_tok (chunk.memory, tok, len, &cp_tok, "posixgid", "");
+		copy_tok (chunk.memory, tok, len, &cp_tok, "posixgid", def_gid);
 
 		(*xattrs)->posixhomedir = cp_tok.buf + cp_tok.offset;
-		copy_tok (chunk.memory, tok, len, &cp_tok, "posixhomedir", "");
+		copy_tok (chunk.memory, tok, len, &cp_tok, "posixhomedir", def_home);
 
 		(*xattrs)->posixshell = cp_tok.buf + cp_tok.offset;
-		copy_tok (chunk.memory, tok, len, &cp_tok, "posixshell", "");
+		copy_tok (chunk.memory, tok, len, &cp_tok, "posixshell", def_shell);
 
 		(*xattrs)->posixgecos = cp_tok.buf + cp_tok.offset;
-		copy_tok (chunk.memory, tok, len, &cp_tok, "posixgecos", "");
+		copy_tok (chunk.memory, tok, len, &cp_tok, "posixgecos", sp_username);
 
 		if (cp_tok.status == -1) {
 			/* buffer is too small. Reallocate with the size computed by copy_tok() in previous calls */
@@ -469,8 +510,7 @@ int sp_xattrs (sp_xattrs_t **xattrs, char *sp_username) {
  * caller will free() the structure after use
  * username: specifies the username in Posix format, i.e. user
  */
-int sp_xattrs_p (sp_xattrs_t **xattrs, const char *username) {
-	char *sp_name;
+int sp_xattrs_p (sp_xattrs_t **xattrs, const char *username, int get_defaults) {
 
 	if ((sp_config.status != SP_INITED)) {
 		if (!(sp_init ())) return -1;
@@ -480,13 +520,10 @@ int sp_xattrs_p (sp_xattrs_t **xattrs, const char *username) {
 		return -1;
 	}
 	/* concatenate realm to name */
-	if ((sp_name = malloc (strlen (username) + strlen (sp_config.realm) + 2)) == NULL) {
-		error ("malloc() failed");
-		return -1;
-	}
-	sprintf (sp_name, "%s%s%s", username, "@", sp_config.realm);
-	int rc = sp_xattrs (xattrs, sp_name);
-	free (sp_name);
+ 	char sp_name[(strlen (username) + strlen (sp_config.default_realm) + 2)]; 
+	sprintf (sp_name, "%s%s%s", username, "@", sp_config.default_realm);
+	int rc = sp_xattrs (xattrs, sp_name, get_defaults);
+
 	return rc;
 
 }
@@ -497,27 +534,22 @@ int sp_xattrs_p (sp_xattrs_t **xattrs, const char *username) {
  * 										caller will free() the structure after use
  * username: specifies the username
  */
-int sp_user_info (sp_user_info_t **uinfo, const char *username) {
+int sp_user_info (sp_user_info_t **uinfo, const char *sp_username) {
 	int len;
 	jsmntok_t *tok;
 	struct MemoryStruct chunk;
-	char *post_data;
 
 	debug (4, "==> sp_user_info");
 	if ((sp_config.status != SP_INITED)) {
 		if (!(sp_init ())) return -1;
 	}
-	if (username == NULL)  {
+	if (sp_username == NULL)  {
 		error ("sp_user_info() called with username=NULL");
 		return -1;
 	}
-	if ((post_data = malloc (strlen ("USERNAME=") + strlen (username) + 1)) == NULL) {
-		error ("malloc() failed");
-		return -1;
-	}
-	sprintf (post_data, "%s%s", "USERNAME=", username);
+	char post_data[(strlen ("USERNAME=") + strlen (sp_username) + 1)];
+	sprintf (post_data, "%s%s", "USERNAME=", sp_username);
 	len = do_curl(sp_config.URL_u_info, post_data, &tok, (struct MemoryStruct *) &chunk);
-	free (post_data);
 	if (len == -1) {
 		return -1;
 	}
@@ -614,7 +646,6 @@ int sp_list_users (char ***user, const char *realm) {
 	char *r_ptr, **u_ptr, *u_str;
 	jsmntok_t *tok;
 	struct MemoryStruct chunk;
-	char *post_data;
 
 	if ((sp_config.status != SP_INITED)) {
 		if (!(sp_init ())) return -1;
@@ -622,14 +653,11 @@ int sp_list_users (char ***user, const char *realm) {
 	if (realm != NULL) 
 		r_ptr = (char *) realm;
 	else
-		r_ptr = sp_config.realm;	
-	if ((post_data = malloc (strlen ("REALM=") + strlen (r_ptr) + 1)) == NULL) {
-		error ("malloc() failed");
-		return -1;
-	}
+		r_ptr = sp_config.default_realm;	
+
+	char post_data[(strlen ("REALM=") + strlen (r_ptr) + 1)];
 	sprintf (post_data, "%s%s", "REALM=", r_ptr);
 	len = do_curl(sp_config.URL_u_list, post_data, &tok, (struct MemoryStruct *) &chunk);
-	free (post_data);
 	if (len == -1) {
 		return -1;
 	}

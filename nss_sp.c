@@ -75,7 +75,7 @@ enum nss_status _nss_sp_getpwnam_r (const char *name,
 	}
 
 	/* call SP API */
-	int rc = sp_xattrs_p (&xattrs, name);
+	int rc = sp_xattrs_p (&xattrs, name, 1);
 	if (rc == -1) {
 		debug (1, "sp_xattrs() returned error");
 		return NSS_STATUS_NOTFOUND;

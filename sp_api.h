@@ -18,7 +18,11 @@ struct sp_config {
 	char *URL_u_list;
 	char *URL_u_info;
 	char *URL_u_x_list;
-	char *realm;
+	char *default_gid;
+	char *default_home;
+	char *default_shell;
+	char *default_realm;
+
 };
 
 typedef struct {
@@ -47,5 +51,5 @@ extern struct sp_config sp_config;
 int sp_init ();
 int sp_list_users (char ***user, const char *realm);
 int sp_user_info (sp_user_info_t **uinfo, const char *username);
-int sp_xattrs (sp_xattrs_t **xattrs, char *username);
-int sp_xattrs_p (sp_xattrs_t **xattrs, const char *username);
+int sp_xattrs (sp_xattrs_t **xattrs, char *username, int get_defaults);
+int sp_xattrs_p (sp_xattrs_t **xattrs, const char *username, int get_defaults);

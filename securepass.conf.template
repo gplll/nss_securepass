@@ -1,16 +1,18 @@
 #/etc/securepass.conf
 #
-# DEBUG: writes to syslog - 0 ==> no debug, from 1 to 4 ==> debug level
-# DEBUG_STDERR: writes to stderr - 0 ==> no debug, from 1 to 4 ==> debug level
-# SP_URL example: https://beta.secure-pass.net/api/v1
-# SP_REALM example: wiran.net
+# debug: writes to syslog - 0 ==> no debug, from 1 to 4 ==> debug level
+# debug_stderr: writes to stderr - 0 ==> no debug, from 1 to 4 ==> debug level
+# Mandatory parameters: app_id, app_secret, endpoint, default_realm
 #
 [default]
-DEBUG = 0
-DEBUG_STDERR = 0
-APP_ID = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-APP_SECRET = BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-SP_URL = myurl
+debug = 0
+debug_stderr = 0
+app_id = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+app_secret = BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+endpoint = https://beta.secure-pass.net
 
 [nss]
-SP_REALM= myrealm
+default_realm = company.net
+#default_gid = 100
+#default_home = "/home"
+#default_shell = "/bin/bash"

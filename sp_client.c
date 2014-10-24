@@ -74,7 +74,7 @@ void get_xattrs (char *user) {
 
 	sp_xattrs_t *xattrs;
 
-	if (sp_xattrs (&xattrs, user) == -1) {
+	if (sp_xattrs (&xattrs, user, 0) == -1) {
 		printf ("sp_xattrs() returned error\n");
 	} else {
 		/* print xattrs */
@@ -94,40 +94,9 @@ int main(int argc, char *argv[]) {
 	get_options(argc, argv);
 	if (user) {
 		get_user_info (user);
-#if 0
-		if (sp_user_info (&user_info, user) == -1) {
-			printf ("sp_user_info() returned error\n");
-		} else {
-			/* print user */
-			printf ("nin =%s\n", user_info->nin);
-			printf ("name =%s\n", user_info->name);
-			printf ("surname =%s\n", user_info->surname);
-			printf ("mobile =%s\n", user_info->mobile);
-			printf ("rfid =%s\n", user_info->rfid);
-			printf ("enabled =%s\n", user_info->enabled);
-			printf ("token =%s\n", user_info->token);
-			printf ("manager =%s\n", user_info->manager);
-			printf ("password =%s\n", user_info->password);
-			printf ("email =%s\n", user_info->email);
-			free (user_info);
-		}
-#endif
 	} 
 	if (xattrs_user) {
 		get_xattrs (xattrs_user);
-#if 0
-		if (sp_xattrs (&xattrs, xattrs_user) == -1) {
-			printf ("sp_xattrs() returned error\n");
-		} else {
-			/* print xattrs */
-			printf ("posixuid =%s\n", xattrs->posixuid);
-			printf ("posixgid =%s\n", xattrs->posixgid);
-			printf ("posixhomedir =%s\n", xattrs->posixhomedir);
-			printf ("posixshell =%s\n", xattrs->posixshell);
-			printf ("posixgecos =%s\n", xattrs->posixgecos);
-			free (xattrs);
-		}
-#endif
 	} 
 	if (app) {
 	} 

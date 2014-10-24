@@ -1,5 +1,7 @@
+LIBNSS_SP=libnss_sp.so.2
+LIBNSS_SP_SO=libnss_sp.so
 CC=@CC@
-LDFLAGS+=-shared -Wl,-Bdynamic @LDFLAGS@
+LDFLAGS+=-shared -Wl,-Bdynamic  -Wl,-soname,$(LIBNSS_SP) @LDFLAGS@
 LIBS+=@LIBS@
 CFLAGS+=-I. -g @CPPFLAGS@ @CFLAGS@
 INSTALL=@INSTALL@
@@ -23,8 +25,6 @@ SP_CLIENT_OBJS=sp_client.o
 NSS_CLIENT_SRCS=nss_client.c
 NSS_CLIENT_OBJS=nss_client.o
 LIBSP=libsp.a
-LIBNSS_SP=libnss_sp.so.2
-LIBNSS_SP_SO=libnss_sp.so
 TEST_INI=test_ini
 SP_CLIENT=sp_client
 NSS_CLIENT=nss_client
@@ -81,3 +81,4 @@ ${DISTBALL}:
 	mkdir -p ${DISTDIR}
 	cp --parents ${DISTFILES} ${DISTDIR}
 	tar -czvf ${DISTBALL} ${DISTDIR}
+	rm -rf ${DISTDIR}
