@@ -4,8 +4,6 @@
 AC_PREREQ([2.63])
 AC_INIT([nss_securepass], [1.0.0.0])
 AC_CANONICAL_HOST
-#AC_PREFIX_DEFAULT()
-#AC_PREFIX_PROGRAM(ls)
 case $host_os in
   linux*)
         # OK, let's go on
@@ -42,15 +40,5 @@ else AC_MSG_ERROR(gcc is required - pls. install it)
 fi
 
 AC_CONFIG_FILES([Makefile])
-
-#AC_MSG_NOTICE(CFLAGS= $CFLAGS)
-#AC_MSG_NOTICE(CC= $CC)
-#AC_MSG_NOTICE(GCC= $GCC)
-#AC_MSG_NOTICE(AR= $AR)
-#AC_MSG_NOTICE(INSTALL= $INSTALL)
-#AC_MSG_NOTICE(LIBS= $LIBS)
-#AC_MSG_NOTICE(libdir= $libdir)
-#AC_MSG_NOTICE(exec_prefix= $exec_prefix)
-#AC_MSG_NOTICE(prefix= $prefix)
 
 AC_OUTPUT
