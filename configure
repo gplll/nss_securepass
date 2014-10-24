@@ -2178,8 +2178,6 @@ IFS=$ac_save_IFS
 case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
-#AC_PREFIX_DEFAULT()
-#AC_PREFIX_PROGRAM(ls)
 case $host_os in
   linux*)
         # OK, let's go on
@@ -3580,16 +3578,6 @@ fi
 
 ac_config_files="$ac_config_files Makefile"
 
-
-#AC_MSG_NOTICE(CFLAGS= $CFLAGS)
-#AC_MSG_NOTICE(CC= $CC)
-#AC_MSG_NOTICE(GCC= $GCC)
-#AC_MSG_NOTICE(AR= $AR)
-#AC_MSG_NOTICE(INSTALL= $INSTALL)
-#AC_MSG_NOTICE(LIBS= $LIBS)
-#AC_MSG_NOTICE(libdir= $libdir)
-#AC_MSG_NOTICE(exec_prefix= $exec_prefix)
-#AC_MSG_NOTICE(prefix= $prefix)
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
