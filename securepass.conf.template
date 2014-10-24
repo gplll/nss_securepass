@@ -12,7 +12,7 @@ app_secret = BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
 endpoint = https://beta.secure-pass.net
 
 [nss]
-default_realm = company.net
+realm = company.net
 #default_gid = 100
 #default_home = "/home"
 #default_shell = "/bin/bash"

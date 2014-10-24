@@ -110,7 +110,7 @@ int IniCallback(const char *section, const char *key, const char *value, const v
 		}
 	}
 	if (strcmp (section, "nss") == 0) {
-		check_ini_string (k, value, "default_realm", &sp_config.default_realm, NULL, NULL, 1);
+		check_ini_string (k, value, "realm", &sp_config.realm, NULL, NULL, 1);
 		check_ini_string (k, value, "default_gid", &sp_config.default_gid, NULL, NULL, 0);
 		check_ini_string (k, value, "default_home", &sp_config.default_home, NULL, "/", 0);
 		check_ini_string (k, value, "default_shell", &sp_config.default_shell, NULL, NULL, 0);
@@ -520,8 +520,8 @@ int sp_xattrs_p (sp_xattrs_t **xattrs, const char *username, int get_defaults) {
 		return -1;
 	}
 	/* concatenate realm to name */
- 	char sp_name[(strlen (username) + strlen (sp_config.default_realm) + 2)]; 
-	sprintf (sp_name, "%s%s%s", username, "@", sp_config.default_realm);
+ 	char sp_name[(strlen (username) + strlen (sp_config.realm) + 2)]; 
+	sprintf (sp_name, "%s%s%s", username, "@", sp_config.realm);
 	int rc = sp_xattrs (xattrs, sp_name, get_defaults);
 
 	return rc;
@@ -653,7 +653,7 @@ int sp_list_users (char ***user, const char *realm) {
 	if (realm != NULL) 
 		r_ptr = (char *) realm;
 	else
-		r_ptr = sp_config.default_realm;	
+		r_ptr = sp_config.realm;	
 
 	char post_data[(strlen ("REALM=") + strlen (r_ptr) + 1)];
 	sprintf (post_data, "%s%s", "REALM=", r_ptr);

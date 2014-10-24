@@ -21,7 +21,7 @@ struct sp_config {
 	char *default_gid;
 	char *default_home;
 	char *default_shell;
-	char *default_realm;
+	char *realm;
 
 };
 
