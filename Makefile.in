@@ -58,9 +58,9 @@ $(SP_CLIENT): $(SP_CLIENT_OBJS) $(LIBSP)
 	$(CC) -o $(SP_CLIENT) $(SP_CLIENT_OBJS) $(LIBSP) $(LIBS)
 
 install: $(LIBNSS_SP)
-	$(INSTALL) -o root -g root $(LIBNSS_SP) $(libdir)/$(LIBNSS_SP) 
-	ln -sf $(libdir)/$(LIBNSS_SP) $(libdir)/$(LIBNSS_SP_SO)
-	$(CC) -o $(NSS_CLIENT) $(NSS_CLIENT_OBJS) $(LIBS) -lnss_sp -lpthread
+	mkdir -p $(DESTDIR)/$(libdir)
+	$(INSTALL) -o root -g root $(LIBNSS_SP) $(DESTDIR)/$(libdir)/$(LIBNSS_SP)
+	ln -sf $(LIBNSS_SP) $(DESTDIR)/$(libdir)/$(LIBNSS_SP_SO)
 
 clean:
 	rm -f $(LIBSP) $(LIBNSS_SP) $(TEST_INI) $(SP_CLIENT) $(NSS_CLIENT) $(LIBSP_OBJS) $(OBJS) $(TEST_INI_OBJS) \
