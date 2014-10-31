@@ -32,7 +32,7 @@
      ((strlen(s) == (t).end - (t).start) \
      && (strncmp(js+(t).start, s, (t).end - (t).start) == 0))
      
-struct sp_config sp_config ={SP_NOT_INITED, 0, 0, "", "", "", "", "", "", ""};
+struct sp_config sp_config ={SP_NOT_INITED, 0, 0, "", "", "", "", "", "", "", "", ""};
 
 struct MemoryStruct {
   char *memory;
