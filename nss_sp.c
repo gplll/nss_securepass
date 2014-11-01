@@ -92,6 +92,11 @@ enum nss_status _nss_sp_getpwnam_r (const char *name,
 		/* Fill the output fields */
 		int pos = 0;
 
+		if ((xattrs->posixuid[0] == 0) || (xattrs->posixgid[0] == 0)) {
+			/* uid or gid are not defined - not a valid posix user */
+			free (xattrs);
+			return NSS_STATUS_NOTFOUND;
+		}
 		result->pw_uid = strtoul(xattrs->posixuid, NULL, 10);
 
 		result->pw_gid = strtoul(xattrs->posixgid, NULL, 10);
@@ -157,16 +162,27 @@ enum nss_status _nss_sp_getpwent_r (struct passwd *result,
 		}		
 	}
 
-	/* Call SP API to get next entry */
-	if (u_idx == u_len) {
-		/* reached end of list */
-		_nss_sp_leave ();
-		return NSS_STATUS_NOTFOUND;
+	/* We loop because we need to discard users where uid or gid is not defined */
+	char *s;
+	enum nss_status rc;
+	while (1) {
+		/* Call SP API to get next entry */
+		if (u_idx == u_len) {
+			/* reached end of list */
+			_nss_sp_leave ();
+			return NSS_STATUS_NOTFOUND;
+		}
+		s = *(user_list + u_idx);
+		rc = _nss_sp_getpwnam_r (strtok (s, "@"), result, buffer, buflen, errnop);
+		*(s + strlen(s)) = '@';	
+		u_idx++;
+		if (rc == NSS_STATUS_SUCCESS) {
+			break;
+		} else {
+			/* get next user */
+			continue;
+		}
 	}
-	char *s = *(user_list + u_idx);
-	enum nss_status rc = _nss_sp_getpwnam_r (strtok (s, "@"), result, buffer, buflen, errnop);
-	*(s + strlen(s)) = '@';	
-	u_idx++;
 	_nss_sp_leave ();
 	return rc;
 }
