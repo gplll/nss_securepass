@@ -31,7 +31,7 @@
      ((strlen(s) == (t).end - (t).start) \
      && (strncmp(js+(t).start, s, (t).end - (t).start) == 0))
      
-struct sp_config sp_config ={SP_NOT_INITED, 0, 0, "", "", "", "", "", "", NULL, NULL, ""};
+struct sp_config sp_config ={SP_NOT_INITED, 0, 0, "", "", "", "", "", "", DEFAULT_HOME, DEFAULT_SHELL, ""};
 
 struct MemoryStruct {
   char *memory;
@@ -113,12 +113,6 @@ int IniCallback(const char *section, const char *key, const char *value, const v
 		check_ini_string (k, value, "default_gid", &sp_config.default_gid, NULL, NULL, 0);
 		check_ini_string (k, value, "default_home", &sp_config.default_home, NULL, "/", 0);
 		check_ini_string (k, value, "default_shell", &sp_config.default_shell, NULL, NULL, 0);
-	}
-	if (sp_config.default_home == NULL) {
-		sp_config.default_home = DEFAULT_HOME;
-	}
-	if (sp_config.default_shell == NULL) {
-		sp_config.default_shell = DEFAULT_SHELL;
 	}
 	return 1;
 }
