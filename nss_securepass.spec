@@ -1,8 +1,11 @@
+%global commit a121bc87b136ab65e6c2cf02654b0ee262dbc49a
+%global shortcommit %(c=%{commit}; echo ${c:0:7})
+
 Summary: NSS library for SecurePass.
 Name: nss-securepass
 Version: 0.1
 Release: 1
-Source0: https://github.com/garlsecurity/nss_securepass/%{name}-%{version}.tar.gz
+Source0: https://github.com/garlsecurity/nss_securepass/archive/%{commit}/nss_securepass-%{commit}.tar.gz
 URL: https://github.com/garlsecurity/nss_securepass
 Group: System Environment/Base
 License: GPLv2+
@@ -16,7 +19,7 @@ NSS (Name Service Switch) module for SecurePass
 SecurePass provides identity management and web single sign-on.
 
 %prep
-%setup -n nss_securepass
+%setup -qn nss_securepass-%{commit}
 
 
 %build
