@@ -31,8 +31,8 @@ make
 mkdir -p $RPM_BUILD_ROOT/{etc,lib}
 mkdir -p $RPM_BUILD_ROOT/usr/%{_lib}
 
-/usr/bin/install -c -o root -g root libnss_sp.so.2 $RPM_BUILD_ROOT/usr/%{_lib}/libnss_sp.so.2
-ln -sf libnss_sp.so.2 /usr/%{_lib}/libnss_sp.so
+/usr/bin/install -c libnss_sp.so.2 $RPM_BUILD_ROOT/usr/%{_lib}/libnss_sp.so.2
+ln -sf libnss_sp.so.2 $RPM_BUILD_ROOT/usr/%{_lib}/libnss_sp.so
 
 install -m 644 securepass.conf.template $RPM_BUILD_ROOT/etc/securepass.conf
 
