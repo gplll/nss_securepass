@@ -217,14 +217,18 @@ enum nss_status _nss_sp_getpwuid_r (uid_t uid,
 		char *s = *(user_list + i);
 		rc = _nss_sp_getpwnam_r (strtok (s, "@"), result, buffer, buflen, errnop);
 		*(s + strlen(s)) = '@';	
-		if (rc != NSS_STATUS_SUCCESS) {
-			_nss_sp_leave ();
-			return rc;
-		}	
 		if (uid == result->pw_uid) {
 			_nss_sp_leave ();
 			return NSS_STATUS_SUCCESS;
 		}
+		if (rc != NSS_STATUS_SUCCESS) {
+			if (i < (u_len - 1)) {
+				/* not at the end of the list - get next user */
+				continue;
+			}
+			_nss_sp_leave ();
+			return rc;
+		}	
 	}
     _nss_sp_leave ();
 	return NSS_STATUS_NOTFOUND;
