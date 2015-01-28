@@ -58,12 +58,12 @@ chmod 755 %{buildroot}/usr/%{_lib}/*.so*
 %postun -p /sbin/ldconfig
 
 %changelog
-* Wed Jan 28 2015 Giuseppe Paterno' (gpaterno@garl.ch) 0.2-2
+* Wed Jan 28 2015 Giuseppe Paterno' <gpaterno@garl.ch> 0.2-2
 - Fixed SPEC files for bug #1162234
 
-* Fri Nov 14 2014 Giuseppe Paterno' (gpaterno@garl.ch) 0.2-1
+* Fri Nov 14 2014 Giuseppe Paterno' <gpaterno@garl.ch> 0.2-1
 - Fixed lookup from UID
 - Changed buildroot variable to macro
  
-* Fri Nov 7 2014 Giuseppe Paterno' (gpaterno@garl.ch) 0.1-1
+* Fri Nov 7 2014 Giuseppe Paterno' <gpaterno@garl.ch> 0.1-1
 - First RPM of the SecurePass NSS module
