@@ -1,5 +1,6 @@
 %global commit c1bf10da1873bc212caa857653bef0b1e899703a
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
+%global timestamp 1415738661
 
 Summary: NSS library for SecurePass
 Name: nss-securepass
