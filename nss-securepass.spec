@@ -9,7 +9,6 @@ Source0: https://github.com/garlsecurity/nss_securepass/archive/%{commit}/nss_se
 URL: https://github.com/garlsecurity/nss_securepass
 Group: System Environment/Base
 License: GPLv2+
-BuildRoot: %{_tmppath}/%{name}-root
 BuildRequires: libcurl-devel
 
 %description
@@ -38,7 +37,7 @@ chmod 755 %{buildroot}/%{_libdir}/*.so*
 
 
 %files
-%attr(0755,root,root) %{_libdir}/*.so*
+%{_libdir}/*.so*
 %attr(0600,root,root) %config(noreplace) /etc/securepass.conf
 %doc README.md
 %doc securepass.conf.template
@@ -53,6 +52,10 @@ chmod 755 %{buildroot}/%{_libdir}/*.so*
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Feb 4 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.2-4
+- Converted licenses to Unix format
+- Modified spec to comply with Fedora rules
+
 * Wed Feb 4 2015 Marina Latini <deneb_alpha@opensuse.org> 0.2-4
 - Fixed LICENSES files permissions
 - Fixed license identifier accordig to https://spdx.org/licenses/
