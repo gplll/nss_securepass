@@ -4,8 +4,8 @@
 Summary: NSS library for SecurePass
 Name: nss-securepass
 Version: 0.2
-Release: 3%{?dist}
-Source0: https://github.com/garlsecurity/nss_securepass/archive/%{commit}/nss_securepass-%{commit}.tar.gz
+Release: 4%{?dist}
+Source0: https://github.com/garlsecurity/nss_securepass/archive/%{commit}/nss_securepass-%{timestamp}.%{shortcommit}.tar.gz
 URL: https://github.com/garlsecurity/nss_securepass
 Group: System Environment/Base
 License: GPLv2+
@@ -19,7 +19,7 @@ NSS (Name Service Switch) module for SecurePass
 SecurePass provides identity management and web single sign-on.
 
 %prep
-%setup -qn nss_securepass-%{commit}
+%setup -qn nss_securepass-%{timestamp}.%{shortcommit}
 
 
 %build
@@ -55,6 +55,12 @@ chmod 755 %{buildroot}/%{_libdir}/*.so*
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Feb 4 2015 Marina Latini <deneb_alpha@opensuse.org> 0.2-4
+- Fixed LICENSES files permissions
+- Fixed license identifier accordig to https://spdx.org/licenses/
+- Fixed spec name
+- Added _service file for auto download (Suse OBS)
+
 * Thu Jan 29 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.2-3
 - More changes to the SPEC for bug #1162234
 
