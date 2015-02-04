@@ -18,7 +18,7 @@ NSS (Name Service Switch) module for SecurePass
 SecurePass provides identity management and web single sign-on.
 
 %prep
-%setup -qn nss_securepass-%{timestamp}.%{shortcommit}
+%setup -qn nss_securepass-%{commit}
 
 
 %build
