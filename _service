@@ -1,0 +1,12 @@
+<services>
+  <service name="tar_scm">
+    <param name="scm">git</param>
+    <param name="url">git://github.com/garlsecurity/nss_securepass.git</param>
+    <param name="revision">c1bf10da1873bc212caa857653bef0b1e899703a</param>
+    <param name="filename">nss_securepass</param>
+  </service>
+  <service name="recompress">
+    <param name="file">*.tar</param>
+    <param name="compression">gz</param>
+  </service>
+</services>

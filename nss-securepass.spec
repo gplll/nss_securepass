@@ -4,7 +4,7 @@
 Summary: NSS library for SecurePass
 Name: nss-securepass
 Version: 0.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 Source0: https://github.com/garlsecurity/nss_securepass/archive/%{commit}/nss_securepass-%{commit}.tar.gz
 URL: https://github.com/garlsecurity/nss_securepass
 Group: System Environment/Base
@@ -27,8 +27,7 @@ SecurePass provides identity management and web single sign-on.
 make 
 
 %install
-[ "%{buildroot}" != "/" ] && rm -rf $RPM_BUILD_ROOT
-mkdir -p %{buildroot}/{etc,lib}
+mkdir -p %{buildroot}/etc
 mkdir -p %{buildroot}/%{_libdir}
 
 /usr/bin/install -c libnss_sp.so.2 %{buildroot}/%{_libdir}/libnss_sp.so.2
@@ -36,10 +35,8 @@ ln -sf libnss_sp.so.2 %{buildroot}/%{_libdir}/libnss_sp.so
 
 install -m 644 securepass.conf.template %{buildroot}/etc/securepass.conf
 
-chmod 755 %{buildroot}/usr/%{_lib}/*.so*
+chmod 755 %{buildroot}/%{_libdir}/*.so*
 
-%clean
-[ "%{buildroot}" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
@@ -58,6 +55,9 @@ chmod 755 %{buildroot}/usr/%{_lib}/*.so*
 %postun -p /sbin/ldconfig
 
 %changelog
+* Thu Jan 29 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.2-3
+- More changes to the SPEC for bug #1162234
+
 * Wed Jan 28 2015 Giuseppe Paterno' <gpaterno@garl.ch> 0.2-2
 - Fixed SPEC files for bug #1162234
 
