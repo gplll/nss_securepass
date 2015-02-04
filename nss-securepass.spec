@@ -11,7 +11,6 @@ Group: System Environment/Base
 License: GPLv2+
 BuildRoot: %{_tmppath}/%{name}-root
 BuildRequires: libcurl-devel
-Requires: libcurl
 
 %description
 NSS (Name Service Switch) module for SecurePass
@@ -24,7 +23,7 @@ SecurePass provides identity management and web single sign-on.
 
 %build
 %configure
-make 
+make  %{?_smp_mflags}
 
 %install
 mkdir -p %{buildroot}/etc
@@ -39,7 +38,6 @@ chmod 755 %{buildroot}/%{_libdir}/*.so*
 
 
 %files
-%defattr(-,root,root)
 %attr(0755,root,root) %{_libdir}/*.so*
 %attr(0600,root,root) %config(noreplace) /etc/securepass.conf
 %doc README.md
