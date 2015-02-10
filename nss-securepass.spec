@@ -1,14 +1,9 @@
-%global commit c1bf10da1873bc212caa857653bef0b1e899703a
-%global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global timestamp 1415738661
-
 Summary: NSS library for SecurePass
 Name: nss-securepass
 Version: 0.2
-Release: 4%{?dist}
-Source0: https://github.com/garlsecurity/nss_securepass/archive/%{commit}/nss_securepass-%{timestamp}.%{shortcommit}.tar.gz
+Release: 5%{?dist}
+Source0: https://github.com/garlsecurity/nss_securepass/archive/v%{version}/nss_securepass-v%{version}.tar.gz
 URL: https://github.com/garlsecurity/nss_securepass
-Group: System Environment/Base
 License: GPLv2+
 BuildRequires: libcurl-devel
 
@@ -18,23 +13,17 @@ NSS (Name Service Switch) module for SecurePass
 SecurePass provides identity management and web single sign-on.
 
 %prep
-%setup -qn nss_securepass-%{commit}
-
+%setup -qn nss_securepass-%{version}
+sed -i 's|-o root -g root||g' Makefile.in
 
 %build
 %configure
 make  %{?_smp_mflags}
 
 %install
-mkdir -p %{buildroot}/etc
-mkdir -p %{buildroot}/%{_libdir}
-
-/usr/bin/install -c libnss_sp.so.2 %{buildroot}/%{_libdir}/libnss_sp.so.2
-ln -sf libnss_sp.so.2 %{buildroot}/%{_libdir}/libnss_sp.so
-
+make install DESTDIR=%{buildroot} INSTALL="install -p"
+mkdir -p %{buildroot}/%{_sysconfdir}
 install -m 644 securepass.conf.template %{buildroot}/etc/securepass.conf
-
-chmod 755 %{buildroot}/%{_libdir}/*.so*
 
 
 %files
@@ -53,6 +42,10 @@ chmod 755 %{buildroot}/%{_libdir}/*.so*
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Feb 10 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.2-5
+- Changed to tags in RPM, following now tags upstream
+- More fixes coming from bug #1162234
+
 * Wed Feb 4 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.2-4
 - Converted licenses to Unix format
 - Modified spec to comply with Fedora rules
