@@ -1,6 +1,6 @@
 Summary: NSS library for SecurePass
 Name: nss-securepass
-Version: 0.2
+Version: 0.2.1
 Release: 6%{?dist}
 Source0: https://github.com/garlsecurity/nss_securepass/archive/v%{version}/nss_securepass-v%{version}.tar.gz
 URL: https://github.com/garlsecurity/nss_securepass
