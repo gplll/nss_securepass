@@ -26,12 +26,16 @@ AC_CHECK_HEADER(netdb.h,, AC_MSG_ERROR(could not locate <netdb.h>))
 AC_CHECK_HEADER(nss.h,, AC_MSG_ERROR(could not locate <nss.h>))
 AC_CHECK_HEADER(pthread.h,, AC_MSG_ERROR(could not locate <pthread.h>))
 AC_CHECK_HEADER(syslog.h,, AC_MSG_ERROR(could not locate <syslog.h>))
+AC_CHECK_HEADER(security/pam_appl.h,, AC_MSG_ERROR(could not locate <security/pam_appl.h> - pls. install PAM devel package))
+AC_CHECK_HEADER(security/pam_modules.h,, AC_MSG_ERROR(could not locate <security/pam_modules.h - pls. install PAM devel package>))
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
 AC_CHECK_LIB(curl, curl_easy_init,,AC_MSG_ERROR(libcurl development package  is missing - pls install it))
+AC_CHECK_LIB(pam, pam_start,,AC_MSG_ERROR(PAM development package  is missing - pls install it))
+AC_CHECK_LIB(pam_misc, misc_conv,,AC_MSG_ERROR(pam_misc library is missing - pls install it))
 
 # check for gcc and set FLAGS
 if test "$ac_cv_prog_gcc" = "yes"
@@ -39,6 +43,13 @@ then CFLAGS="$CFLAGS -Wall -fPIC"
 else AC_MSG_ERROR(gcc is required - pls. install it) 
 fi
 
+# check for existance of directory /lib/security
+#libsecurity=/lib/security
+#if [ ! test -d $libsecurity ]; then
+#AC_MSG_ERROR(directory $libsecurity is missing)
+#fi
+
+#AC_CHECK_FILE (/lib/security,, AC_MSG_ERROR(directory /lib/security is missing))
 AC_CONFIG_FILES([Makefile])
 
 AC_OUTPUT

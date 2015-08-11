@@ -31,7 +31,7 @@
      ((strlen(s) == (t).end - (t).start) \
      && (strncmp(js+(t).start, s, (t).end - (t).start) == 0))
      
-struct sp_config sp_config ={SP_NOT_INITED, 0, 0, "", "", "", "", "", "", DEFAULT_HOME, DEFAULT_SHELL, ""};
+struct sp_config sp_config ={SP_NOT_INITED, 0, 0, "", "", "", "", "", "", "", "", DEFAULT_HOME, DEFAULT_SHELL, ""};
 
 struct MemoryStruct {
   char *memory;
@@ -48,7 +48,7 @@ char *types[] = {"PRIMITIVE", "OBJECT","ARRAY","STRING"};
  * result: output variable - is mallocated() within this function
  * prefix: string to be prefixed to value
  * postfix: string to be postfixed to value 
- * mandatory: param is mandadotory, increment param_count global variable
+ * mandatory: param is mandatory, increment param_count global variable
  */
 void check_ini_string (const char *key, const char *value, const char *key_to_chk, char **result, 
 						char *prefix, char *postfix, int mandatory) {
@@ -101,6 +101,8 @@ int IniCallback(const char *section, const char *key, const char *value, const v
 		check_ini_string (k, value, "endpoint", &sp_config.URL_u_list, NULL, "/api/v1/users/list", 1);
 		check_ini_string (k, value, "endpoint", &sp_config.URL_u_info, NULL, "/api/v1/users/info", 1);
 		check_ini_string (k, value, "endpoint", &sp_config.URL_u_x_list, NULL, "/api/v1/users/xattrs/list", 1);
+		check_ini_string (k, value, "endpoint", &sp_config.URL_u_pwd_chg, NULL, "/api/v1/users/password/change", 1);
+		check_ini_string (k, value, "endpoint", &sp_config.URL_u_auth, NULL, "/api/v1/users/auth", 1);
 		if (strcmp (k, "debug") == 0) {
 			sp_config.debug = atoi (value);
 		}
@@ -399,7 +401,9 @@ static int do_curl (const char *url, char *post_data, jsmntok_t **tok, struct Me
  * xattrs: pointer to a sp_xattrs_t that will be allocated by this function
  * caller will free() the structure after use
  * username: specifies the username in SecurePass format, i.e. user@realm
- * get_defaults: when no value, get default values from config file
+ * get_defaults: 
+ *   if 1: when no value is returned by securepass for a token, return default values from config file
+ *   if 0: when no value is returned by securepass for a token, return an empty value
  */
 int sp_xattrs (sp_xattrs_t **xattrs, char *sp_username, int get_defaults) {
 	int len;
@@ -525,6 +529,140 @@ int sp_xattrs_p (sp_xattrs_t **xattrs, const char *username, int get_defaults) {
 
 	return rc;
 
+}
+
+/*
+ * returns 1 if SUCCESS, -1 if error
+ * sp_username: specifies the username in SecurePass format, i.e. user@realm
+ * pwd: password to set
+ */
+int sp_user_password_change (const char *sp_username, const char* pwd) {
+
+	int len;
+	jsmntok_t *tok;
+	struct MemoryStruct chunk;
+
+	/*	debug (4, "==> sp_user_password_change sp_username=%s pwd=%s", sp_username, pwd); */
+	debug (4, "==> sp_user_password_change sp_username=%s", sp_username);
+	if ((sp_config.status != SP_INITED)) {
+		if (!(sp_init ())) return -1;
+	}
+	if (sp_username == NULL)  {
+		error ("sp_user_password_change() called with username=NULL");
+		return -1;
+	}
+	if (pwd == NULL)  {
+		error ("sp_user_password_change() called with password=NULL");
+		return -1;
+	}
+	/* call curl */
+	char post_data[(strlen ("USERNAME=") + strlen (sp_username) + strlen ("PASSWORD") + strlen (pwd) + 2)];
+	sprintf (post_data, "USERNAME=%s&PASSWORD=%s", sp_username, pwd);
+	len = do_curl(sp_config.URL_u_pwd_chg, post_data, &tok, (struct MemoryStruct *) &chunk);
+	if (len == -1) {
+		return -1;
+	}
+	/* check for value of rc token */
+	if (!(rc_ok (chunk.memory, tok, len))) {
+		free (tok);
+		free (chunk.memory);
+		return -1;
+	}
+	return 1;
+}
+
+/*
+ * returns 1 if SUCCESS, -1 if error
+ * username: specifies the username in Posix format, i.e. user
+ * pwd: password to set
+ */
+int sp_user_password_change_p (const char *username, const char* pwd) {
+
+	if ((sp_config.status != SP_INITED)) {
+		if (!(sp_init ())) return -1;
+	}
+	if (username == NULL)  {
+		error ("sp_user_password_change_p() called with username=NULL");
+		return -1;
+	}
+	/* concatenate realm to name */
+ 	char sp_name[(strlen (username) + strlen (sp_config.realm) + 2)]; 
+	sprintf (sp_name, "%s%s%s", username, "@", sp_config.realm);
+	return sp_user_password_change (sp_name, pwd);
+}
+
+/*
+ * returns 1 if SUCCESS, -1 if error
+ * sp_username: specifies the username in SecurePass format, i.e. user@realm
+ * secret: concatenation of OTP and password
+ */
+int sp_user_auth (const char *sp_username, const char* secret) {
+
+	int len;
+	jsmntok_t *tok;
+	struct MemoryStruct chunk;
+
+	/* debug (4, "==> sp_user_auth, sp_username=%s secret=%s", sp_username, secret); */
+	debug (4, "==> sp_user_auth, sp_username=%s", sp_username);
+	if ((sp_config.status != SP_INITED)) {
+		if (!(sp_init ())) return -1;
+	}
+	if (sp_username == NULL)  {
+		error ("sp_user_auth() called with username=NULL");
+		return -1;
+	}
+	if (secret == NULL)  {
+		error ("sp_user_auth() called with secret=NULL");
+		return -1;
+	}
+	/* call curl */
+	char post_data[(strlen ("USERNAME=") + strlen (sp_username) + strlen ("SECRET") + strlen (secret) + 2)];
+	sprintf (post_data, "USERNAME=%s&SECRET=%s", sp_username, secret);
+	len = do_curl(sp_config.URL_u_auth, post_data, &tok, (struct MemoryStruct *) &chunk);
+	if (len == -1) {
+		return -1;
+	}
+	/* check for value of rc token */
+	if (!(rc_ok (chunk.memory, tok, len))) {
+		free (tok);
+		free (chunk.memory);
+		return -1;
+	}
+	int r = get_tok (chunk.memory, tok, len, "authenticated");
+	if (r == -1) {
+		debug (1, "token 'authenticated' not found in JSON response");
+	} else {
+		if (TOK_CMP (chunk.memory, tok[r], "true") == 0) {
+			debug (1, "token 'authenticated' has wrong value, expected true");
+			/* set error */
+			r = -1;
+		}
+	}
+	if (r == -1) {
+		free (tok);
+		free (chunk.memory);
+		return -1;
+	}
+	return 1;
+}
+
+/*
+ * returns 1 if SUCCESS, -1 if error
+ * sp_username: specifies the username in Posix format, i.e. user
+ * secret: made up of concatenation of OTP and password
+ */
+int sp_user_auth_p (const char *username, const char* secret) {
+	if ((sp_config.status != SP_INITED)) {
+		if (!(sp_init ())) return -1;
+	}
+	if (username == NULL)  {
+		error ("sp_user_auth_p() called with username=NULL");
+		return -1;
+	}
+	/* concatenate realm to name */
+ 	char sp_name[(strlen (username) + strlen (sp_config.realm) + 2)]; 
+	sprintf (sp_name, "%s%s%s", username, "@", sp_config.realm);
+	return sp_user_auth (sp_name, secret);
 }
 
 /*

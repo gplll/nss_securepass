@@ -1,35 +1,42 @@
 LIBNSS_SP=libnss_sp.so.2
 LIBNSS_SP_SO=libnss_sp.so
+LIBPAM_SP_SO=pam_sp_auth.so
 CC=@CC@
-LDFLAGS+=-shared -Wl,-Bdynamic  -Wl,-soname,$(LIBNSS_SP) @LDFLAGS@
+LDFLAGS+=-shared -Wl,-Bdynamic @LDFLAGS@
 LIBS+=@LIBS@
 CFLAGS+=-I. -g @CPPFLAGS@ @CFLAGS@
 INSTALL=@INSTALL@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
+pamlibdir=security
 
 #Set a few distribution variables
 DISTNAME=@PACKAGE_NAME@-@PACKAGE_VERSION@
 DISTDIR=${DISTNAME}
 DISTBALL=${DISTNAME}.tgz
 
+HDRS=nss_sp.h pam_sp_auth.h sp_api.h jsmn.h minIni.h minGlue.h
 LIBSP_SRCS=sp_api.c jsmn.c minIni.c
 LIBSP_OBJS=sp_api.o jsmn.o minIni.o
-SRCS=nss_sp.c
-OBJS=nss_sp.o
-HDRS=nss_sp.h sp_api.h jsmn.h minIni.h minGlue.h
+LIBNSS_SRCS=nss_sp.c
+LIBNSS_OBJS=nss_sp.o
+LIBPAM_SRCS=pam_sp_auth.c
+LIBPAM_OBJS=pam_sp_auth.o
 TEST_INI_SRCS=test_ini.c
 TEST_INI_OBJS=test_ini.o
 SP_CLIENT_SRCS=sp_client.c
 SP_CLIENT_OBJS=sp_client.o
+PAM_CLIENT_SRCS=pam_client.c
+PAM_CLIENT_OBJS=pam_client.o
 NSS_CLIENT_SRCS=nss_client.c
 NSS_CLIENT_OBJS=nss_client.o
 LIBSP=libsp.a
 TEST_INI=test_ini
 SP_CLIENT=sp_client
+PAM_CLIENT=pam_client
 NSS_CLIENT=nss_client
 #BASEFILES represents all *source* files, in the truest sense (no auto* artifacts)
-BASEFILES=$(LIBSP_SRCS) $(SRCS) $(HDRS) $(TEST_INI_SRCS) $(SP_CLIENT_SRCS) $(NSS_CLIENT_SRCS) \
+BASEFILES=$(LIBSP_SRCS) $(LIBNSS_SRCS) $(LIBPAM_SRCS) $(HDRS) $(TEST_INI_SRCS) $(SP_CLIENT_SRCS) $(PAM_CLIENT_SRCS) $(NSS_CLIENT_SRCS) \
           Makefile.in configure.ac install-sh config.sub config.guess \
           securepass.conf.template ADD_USERS.sh DEL_USERS.sh DO_TEST.sh test.ini \
           README.md LICENSE LICENSE_GNUGPL LICENSE_MIT LICENSE_APACHE2
@@ -40,13 +47,16 @@ DISTFILES=configure ${BASEFILES}
 %.o: %.c $(HDRS) 
 	$(CC) -c $(CFLAGS) $< -o $@
 
-all: $(LIBSP) $(LIBNSS_SP) $(TEST_INI) $(SP_CLIENT) $(NSS_CLIENT_OBJS)
+all: $(LIBSP) $(LIBNSS_SP) $(LIBPAM_SP_SO) $(TEST_INI) $(SP_CLIENT) $(NSS_CLIENT_OBJS) $(PAM_CLIENT)
  
 $(LIBSP): $(LIBSP_OBJS)
 	$(AR) -crus $(LIBSP) $(LIBSP_OBJS)
 
-$(LIBNSS_SP): $(LIBSP) $(OBJS)
-	$(CC) $(LDFLAGS) -o $(LIBNSS_SP) $(OBJS) $(LIBSP) $(LIBS)
+$(LIBNSS_SP): $(LIBSP) $(LIBNSS_OBJS)
+	$(CC) $(LDFLAGS) -Wl,-soname,$(LIBNSS_SP) -o $(LIBNSS_SP) $(LIBNSS_OBJS) $(LIBSP) $(LIBS)
+
+$(LIBPAM_SP_SO): $(LIBSP) $(LIBPAM_OBJS)
+	$(CC) $(LDFLAGS) -Wl,-soname,$(LIBPAM_SP_SO) -o $(LIBPAM_SP_SO) $(LIBPAM_OBJS) $(LIBSP) $(LIBS)
 
 $(TEST_INI): $(TEST_INI_OBJS) $(LIBSP)
 	$(CC) -o $(TEST_INI) $(TEST_INI_OBJS) $(LIBSP)
@@ -54,18 +64,24 @@ $(TEST_INI): $(TEST_INI_OBJS) $(LIBSP)
 $(NSS_CLIENT): $(NSS_CLIENT_OBJS) $(LIBSP)
 	$(CC) -o $(NSS_CLIENT) $(NSS_CLIENT_OBJS) $(LIBS) -lnss_sp -lpthread
 
+$(PAM_CLIENT): $(PAM_CLIENT_OBJS) $(LIBSP)
+	$(CC) -o $(PAM_CLIENT) $(PAM_CLIENT_OBJS) $(LIBS) -lpam -lpam_misc -lpthread
+
 $(SP_CLIENT): $(SP_CLIENT_OBJS) $(LIBSP)
 	$(CC) -o $(SP_CLIENT) $(SP_CLIENT_OBJS) $(LIBSP) $(LIBS)
 
-install: $(LIBNSS_SP)
+install: $(LIBNSS_SP) $(LIBPAM_SP_SO)
 	mkdir -p $(DESTDIR)/$(libdir)
 	$(INSTALL) -o root -g root $(LIBNSS_SP) $(DESTDIR)/$(libdir)/$(LIBNSS_SP)
 	ln -sf $(LIBNSS_SP) $(DESTDIR)/$(libdir)/$(LIBNSS_SP_SO)
+	mkdir -p $(DESTDIR)/$(libdir)/$(pamlibdir)
+	$(INSTALL) -o root -g root $(LIBPAM_SP_SO) $(DESTDIR)/$(libdir)/$(pamlibdir)/$(LIBPAM_SP_SO)
 
 clean:
-	rm -f $(LIBSP) $(LIBNSS_SP) $(TEST_INI) $(SP_CLIENT) $(NSS_CLIENT) $(LIBSP_OBJS) $(OBJS) $(TEST_INI_OBJS) \
-          $(SP_CLIENT_OBJS) $(NSS_CLIENT_OBJS)
+	rm -f $(LIBSP) $(LIBNSS_SP) $(LIBPAM_SP_SO) $(TEST_INI) $(SP_CLIENT) $(NSS_CLIENT) $(PAM_CLIENT) $(LIBSP_OBJS) \
+          $(LIBNSS_OBJS) $(LIBPAM_OBJS) $(TEST_INI_OBJS) $(SP_CLIENT_OBJS) $(NSS_CLIENT_OBJS) $(PAM_CLIENT_OBJS)
 	rm -f $(libdir)/$(LIBNSS_SP) $(libdir)/$(LIBNSS_SP_SO)
+	rm -f $(libdir)/$(pamlibdir)/$(LIBPAM_SP_SO)
 	rm -f ${DISTDIR}/* ${DISTBALL}
 
 distclean: clean
