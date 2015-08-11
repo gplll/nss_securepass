@@ -31,7 +31,8 @@ There are reserved words in SecurePass extended attributes:
 
 `posixuid` is the only required extended attribute, this is needed to recognize a SecurePass user as a Unix user. For any other parameter, you need to set defaults in /etc/securepass.conf:
 
-```[nss]
+```
+[nss]
 realm = domain.com
 default_gid = 100
 default_home = "/home"
@@ -46,7 +47,8 @@ Read-only API keys will result in an error.
 
 An example of PAM configuration under /etc/pam.d/:
 
-```password   required   /lib/security/pam_sp.so
+```
+password   required   /lib/security/pam_sp.so
 auth       required   /lib/security/pam_sp.so
 ```
 
