@@ -1,6 +1,6 @@
 /*
  *
- * File: 	pam_sp_auth.c
+ * File: 	pam_sp.c
  * Author: 	gplll <gplll1818@gmail.com>, Aug 2015
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -51,7 +51,7 @@
 #include <security/pam_appl.h>
 #include <security/pam_modules.h>
 #include "sp_api.h"
-#include "pam_sp_auth.h"
+#include "pam_sp.h"
 
 #define SP_INIT \
     if ((sp_config.status != SP_INITED)) { \

@@ -1,6 +1,6 @@
 LIBNSS_SP=libnss_sp.so.2
 LIBNSS_SP_SO=libnss_sp.so
-LIBPAM_SP_SO=pam_sp_auth.so
+LIBPAM_SP_SO=pam_sp.so
 CC=@CC@
 LDFLAGS+=-shared -Wl,-Bdynamic @LDFLAGS@
 LIBS+=@LIBS@
@@ -20,8 +20,8 @@ LIBSP_SRCS=sp_api.c jsmn.c minIni.c
 LIBSP_OBJS=sp_api.o jsmn.o minIni.o
 LIBNSS_SRCS=nss_sp.c
 LIBNSS_OBJS=nss_sp.o
-LIBPAM_SRCS=pam_sp_auth.c
-LIBPAM_OBJS=pam_sp_auth.o
+LIBPAM_SRCS=pam_sp.c
+LIBPAM_OBJS=pam_sp.o
 TEST_INI_SRCS=test_ini.c
 TEST_INI_OBJS=test_ini.o
 SP_CLIENT_SRCS=sp_client.c
@@ -80,8 +80,8 @@ install: $(LIBNSS_SP) $(LIBPAM_SP_SO)
 clean:
 	rm -f $(LIBSP) $(LIBNSS_SP) $(LIBPAM_SP_SO) $(TEST_INI) $(SP_CLIENT) $(NSS_CLIENT) $(PAM_CLIENT) $(LIBSP_OBJS) \
           $(LIBNSS_OBJS) $(LIBPAM_OBJS) $(TEST_INI_OBJS) $(SP_CLIENT_OBJS) $(NSS_CLIENT_OBJS) $(PAM_CLIENT_OBJS)
-	rm -f $(libdir)/$(LIBNSS_SP) $(libdir)/$(LIBNSS_SP_SO)
-	rm -f $(libdir)/$(pamlibdir)/$(LIBPAM_SP_SO)
+	#rm -f $(libdir)/$(LIBNSS_SP) $(libdir)/$(LIBNSS_SP_SO)
+	#rm -f $(libdir)/$(pamlibdir)/$(LIBPAM_SP_SO)
 	rm -f ${DISTDIR}/* ${DISTBALL}
 
 distclean: clean

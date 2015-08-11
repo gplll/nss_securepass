@@ -1,6 +1,6 @@
 Summary: NSS library for SecurePass
 Name: nss-securepass
-Version: 0.2.2
+Version: 0.3
 Release: 1%{?dist}
 Source0: https://github.com/garlsecurity/nss_securepass/archive/v%{version}/nss_securepass-v%{version}.tar.gz
 URL: https://github.com/garlsecurity/nss_securepass
@@ -42,8 +42,11 @@ install -m 644 securepass.conf.template %{buildroot}/etc/securepass.conf
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Aug 11 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.3
+- Updated 0.3 to have PAM
+
 * Wed Feb 11 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.2.2-1
-* Sync'ed SPEC with upstream
+- Sync'ed SPEC with upstream
 
 * Tue Feb 10 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.2-5
 - Changed to tags in RPM, following now tags upstream
