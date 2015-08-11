@@ -29,7 +29,7 @@ There are reserved words in SecurePass extended attributes:
 * `posixshell` -> Desired shell
 * `posixgecos` -> Gecos (defaults to username)
 
-`posixuid` is the only required extended attribute, this is needed to recognize a SecurePass user as a Unix user. For any other parameter, you need to set defaults in `/etc/securepass.conf`
+`posixuid` is the only required extended attribute, this is needed to recognize a SecurePass user as a Unix user. For any other parameter, you need to set defaults in /etc/securepass.conf:
 
 ```[nss]
 realm = domain.com
