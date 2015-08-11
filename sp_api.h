@@ -18,11 +18,12 @@ struct sp_config {
 	char *URL_u_list;
 	char *URL_u_info;
 	char *URL_u_x_list;
+	char *URL_u_pwd_chg;
+	char *URL_u_auth;
 	char *default_gid;
 	char *default_home;
 	char *default_shell;
 	char *realm;
-
 };
 
 typedef struct {
@@ -53,3 +54,7 @@ int sp_list_users (char ***user, const char *realm);
 int sp_user_info (sp_user_info_t **uinfo, const char *username);
 int sp_xattrs (sp_xattrs_t **xattrs, char *username, int get_defaults);
 int sp_xattrs_p (sp_xattrs_t **xattrs, const char *username, int get_defaults);
+int sp_user_password_change (const char *sp_username, const char* pwd);
+int sp_user_password_change_p (const char *sp_username, const char* pwd);
+int sp_user_auth (const char *sp_username, const char* secret);
+int sp_user_auth_p (const char *sp_username, const char* secret);

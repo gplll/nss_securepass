@@ -3507,6 +3507,22 @@ else
 fi
 
 
+ac_fn_c_check_header_mongrel "$LINENO" "security/pam_appl.h" "ac_cv_header_security_pam_appl_h" "$ac_includes_default"
+if test "x$ac_cv_header_security_pam_appl_h" = xyes; then :
+
+else
+  as_fn_error $? "could not locate <security/pam_appl.h> - pls. install PAM devel package" "$LINENO" 5
+fi
+
+
+ac_fn_c_check_header_mongrel "$LINENO" "security/pam_modules.h" "ac_cv_header_security_pam_modules_h" "$ac_includes_default"
+if test "x$ac_cv_header_security_pam_modules_h" = xyes; then :
+
+else
+  as_fn_error $? "could not locate <security/pam_modules.h - pls. install PAM devel package>" "$LINENO" 5
+fi
+
+
 
 # Checks for typedefs, structures, and compiler characteristics.
 ac_fn_c_check_type "$LINENO" "size_t" "ac_cv_type_size_t" "$ac_includes_default"
@@ -3569,6 +3585,100 @@ else
   as_fn_error $? "libcurl development package  is missing - pls install it" "$LINENO" 5
 fi
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for pam_start in -lpam" >&5
+$as_echo_n "checking for pam_start in -lpam... " >&6; }
+if ${ac_cv_lib_pam_pam_start+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpam  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pam_start ();
+int
+main ()
+{
+return pam_start ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_pam_pam_start=yes
+else
+  ac_cv_lib_pam_pam_start=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pam_pam_start" >&5
+$as_echo "$ac_cv_lib_pam_pam_start" >&6; }
+if test "x$ac_cv_lib_pam_pam_start" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBPAM 1
+_ACEOF
+
+  LIBS="-lpam $LIBS"
+
+else
+  as_fn_error $? "PAM development package  is missing - pls install it" "$LINENO" 5
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for misc_conv in -lpam_misc" >&5
+$as_echo_n "checking for misc_conv in -lpam_misc... " >&6; }
+if ${ac_cv_lib_pam_misc_misc_conv+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpam_misc  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char misc_conv ();
+int
+main ()
+{
+return misc_conv ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_pam_misc_misc_conv=yes
+else
+  ac_cv_lib_pam_misc_misc_conv=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pam_misc_misc_conv" >&5
+$as_echo "$ac_cv_lib_pam_misc_misc_conv" >&6; }
+if test "x$ac_cv_lib_pam_misc_misc_conv" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBPAM_MISC 1
+_ACEOF
+
+  LIBS="-lpam_misc $LIBS"
+
+else
+  as_fn_error $? "pam_misc library is missing - pls install it" "$LINENO" 5
+fi
+
 
 # check for gcc and set FLAGS
 if test "$ac_cv_c_compiler_gnu" = "yes"
@@ -3576,6 +3686,13 @@ then CFLAGS="$CFLAGS -Wall -fPIC"
 else as_fn_error $? "gcc is required - pls. install it" "$LINENO" 5
 fi
 
+# check for existance of directory /lib/security
+#libsecurity=/lib/security
+#if [ ! test -d $libsecurity ]; then
+#AC_MSG_ERROR(directory $libsecurity is missing)
+#fi
+
+#AC_CHECK_FILE (/lib/security,, AC_MSG_ERROR(directory /lib/security is missing))
 ac_config_files="$ac_config_files Makefile"
 
 
