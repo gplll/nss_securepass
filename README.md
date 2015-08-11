@@ -19,6 +19,8 @@ To install and configure the modules:
 - This repo includes the following sample programs to test the SecurePass, NSS and PAM APIs: 
       sp_client, nss_client, pam_client
 
+**Note**: Due to the current limitations, be aware that the parameter `endpoint` must be set to https://beta.secure-pass.net/ in /etc/securepass.conf.
+
 ## NSS module
 
 There are reserved words in SecurePass extended attributes:
