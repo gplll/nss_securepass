@@ -1,11 +1,13 @@
 Summary: NSS library for SecurePass
 Name: nss-securepass
 Version: 0.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 Source0: https://github.com/garlsecurity/nss_securepass/archive/v%{version}/nss_securepass-v%{version}.tar.gz
 URL: https://github.com/garlsecurity/nss_securepass
 License: GPLv2+
 BuildRequires: libcurl-devel
+BuildRequires: pam-devel
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %description
 NSS (Name Service Switch) module for SecurePass
@@ -21,13 +23,18 @@ sed -i 's|-o root -g root||g' Makefile.in
 make  %{?_smp_mflags}
 
 %install
+rm -Rf %{buildroot}
 make install DESTDIR=%{buildroot} INSTALL="install -p"
 mkdir -p %{buildroot}/%{_sysconfdir}
 install -m 644 securepass.conf.template %{buildroot}/etc/securepass.conf
 
+%clean
+[ "%{buildroot}" != "/" ] && rm -rf %{buildroot}
 
 %files
+%defattr(-,root,root)
 %{_libdir}/*.so*
+%{_libdir}/security/*.so*
 %attr(0600,root,root) %config(noreplace) /etc/securepass.conf
 %doc README.md
 %doc securepass.conf.template
@@ -42,7 +49,10 @@ install -m 644 securepass.conf.template %{buildroot}/etc/securepass.conf
 %postun -p /sbin/ldconfig
 
 %changelog
-* Tue Aug 11 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.3
+* Sun Aug 16 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.3-2
+- Fixes in buildrequires
+
+* Tue Aug 11 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.3-1
 - Updated 0.3 to have PAM
 
 * Wed Feb 11 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.2.2-1
