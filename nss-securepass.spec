@@ -35,7 +35,7 @@ install -m 644 securepass.conf.template %{buildroot}/etc/securepass.conf
 %defattr(-,root,root)
 %{_libdir}/*.so*
 %{_libdir}/security/*.so*
-%attr(0600,root,root) %config(noreplace) /etc/securepass.conf
+%attr(0644,root,root) %config(noreplace) /etc/securepass.conf
 %doc README.md
 %doc securepass.conf.template
 
