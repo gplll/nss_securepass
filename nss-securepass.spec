@@ -1,6 +1,6 @@
 Summary: NSS library for SecurePass
 Name: nss-securepass
-Version: 0.3
+Version: 0.4
 Release: 2%{?dist}
 Source0: https://github.com/garlsecurity/nss_securepass/archive/v%{version}/nss_securepass-v%{version}.tar.gz
 URL: https://github.com/garlsecurity/nss_securepass
@@ -19,7 +19,11 @@ SecurePass provides identity management and web single sign-on.
 sed -i 's|-o root -g root||g' Makefile.in
 
 %build
+%if 0%{?rhel} <= 6
+%configure --libdir=/%{_lib}
+%else
 %configure
+%endif
 make  %{?_smp_mflags}
 
 %install
@@ -33,9 +37,16 @@ install -m 644 securepass.conf.template %{buildroot}/etc/securepass.conf
 
 %files
 %defattr(-,root,root)
+
+%if 0%{?rhel} <= 6
+/%{_lib}/*.so*
+/%{_lib}/security/*.so*
+%else
 %{_libdir}/*.so*
 %{_libdir}/security/*.so*
-%attr(0644,root,root) %config(noreplace) /etc/securepass.conf
+%endif
+
+%config(noreplace) /etc/securepass.conf
 %doc README.md
 %doc securepass.conf.template
 
@@ -49,6 +60,10 @@ install -m 644 securepass.conf.template %{buildroot}/etc/securepass.conf
 %postun -p /sbin/ldconfig
 
 %changelog
+* Fri Sep 4 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.4-0
+- Aligned with upstream release
+- Fixed different lib schema between RHEL/CentOS 6 and below and 7
+
 * Sun Aug 16 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.3-2
 - Fixes in buildrequires
 
