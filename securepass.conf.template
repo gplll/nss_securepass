@@ -5,14 +5,14 @@
 # Mandatory parameters: app_id, app_secret, endpoint, default_realm
 #
 [default]
-debug = 0
-debug_stderr = 0
-app_id = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-app_secret = BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+#debug = 0
+#debug_stderr = 0
+#app_id = <your application id>
+#app_secret = <your application secret>
 endpoint = https://beta.secure-pass.net
 
 [nss]
-realm = company.net
+#realm = company.net
 #default_gid = 100
 #default_home = "/home"
 #default_shell = "/bin/bash"

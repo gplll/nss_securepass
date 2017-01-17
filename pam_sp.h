@@ -1,5 +1,5 @@
 /*
- * File: 	pam_sp_auth.h
+ * File: 	pam_sp.h
  * Author: 	gplll <gplll1818@gmail.com>, Aug 2015
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -20,14 +20,14 @@ typedef struct sp_conf_t {
 #define PAM_DEBUG_STDERR	2
 
 #define error(fmt, args...) \
-syslog(LOG_AUTHPRIV|LOG_ERR, "pam_sp_auth: thread %u - error: " fmt, (uint)pthread_self() , ## args); \
+syslog(LOG_AUTHPRIV|LOG_ERR, "pam_sp: thread %u - error: " fmt, (uint)pthread_self() , ## args); \
 
 #define debug(level, fmt, args...) \
 if ((config.debug)) { \
-syslog(LOG_AUTHPRIV|LOG_DEBUG, "pam_sp_auth: thread %u - " fmt, (uint)pthread_self() , ## args); \
+syslog(LOG_AUTHPRIV|LOG_DEBUG, "pam_sp: thread %u - " fmt, (uint)pthread_self() , ## args); \
 } \
 else if ((config.debug_stderr)) { \
-fprintf(stderr, "pam_sp_auth: " fmt "\n" , ## args); \
+fprintf(stderr, "pam_sp: " fmt "\n" , ## args); \
 }
 
 #define _pam_forget(X) if (X) {memset(X, 0, strlen(X));free(X);X = NULL;}

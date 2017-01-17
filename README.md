@@ -1,5 +1,4 @@
-NSS and PAM modules for SecurePass
-===============================================
+# NSS and PAM modules for SecurePass
 
 This repository contains an NSS module and a PAM module for users defined on SecurePass.
 SecurePass provides web single sign-on through the CAS protocol.
@@ -20,6 +19,40 @@ To install and configure the modules:
 - This repo includes the following sample programs to test the SecurePass, NSS and PAM APIs: 
       sp_client, nss_client, pam_client
 
-Author
-===========================================
+**Note**: Due to the current limitations, be aware that the parameter `endpoint` must be set to https://beta.secure-pass.net/ in /etc/securepass.conf.
+
+## NSS module
+
+There are reserved words in SecurePass extended attributes:
+
+* `posixuid` -> UID of the user
+* `posixgid` -> GID of the user
+* `posixhomedir` -> Home directory
+* `posixshell` -> Desired shell
+* `posixgecos` -> Gecos (defaults to username)
+
+`posixuid` is the only required extended attribute, this is needed to recognize a SecurePass user as a Unix user. For any other parameter, you need to set defaults in /etc/securepass.conf:
+
+```
+[nss]
+realm = domain.com
+default_gid = 100
+default_home = "/home"
+default_shell = "/bin/bash"
+```
+
+## PAM module
+
+The PAM module works both for **authentication** and for **password changing**.
+In order to be able to change your password with the PAM module, the API key must be read-write.
+Read-only API keys will result in an error.
+
+An example of PAM configuration under /etc/pam.d/:
+
+```
+password   required   /lib/security/pam_sp.so
+auth       required   /lib/security/pam_sp.so
+```
+
+# Author
 gplll1818@gmail.com, Oct 2014 - Aug 2015

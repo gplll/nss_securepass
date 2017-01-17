@@ -4,8 +4,8 @@
  *  
  * This program provides a minimal test of SecurePass PAM
  * To run the program, create file /etc/pam.s/pam_sp_client, wtih the following contents:
- * password   required   /lib/security/pam_sp_auth.so debug
- * auth       required   /lib/security/pam_sp_auth.so debug
+ * password   required   /lib/security/pam_sp.so debug
+ * auth       required   /lib/security/pam_sp.so debug
  */
 
 #include <security/pam_appl.h>

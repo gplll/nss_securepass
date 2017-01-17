@@ -1,11 +1,13 @@
 Summary: NSS library for SecurePass
 Name: nss-securepass
-Version: 0.2
-Release: 6%{?dist}
+Version: 0.4
+Release: 2%{?dist}
 Source0: https://github.com/garlsecurity/nss_securepass/archive/v%{version}/nss_securepass-v%{version}.tar.gz
 URL: https://github.com/garlsecurity/nss_securepass
 License: GPLv2+
 BuildRequires: libcurl-devel
+BuildRequires: pam-devel
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %description
 NSS (Name Service Switch) module for SecurePass
@@ -17,18 +19,34 @@ SecurePass provides identity management and web single sign-on.
 sed -i 's|-o root -g root||g' Makefile.in
 
 %build
+%if 0%{?rhel} <= 6
+%configure --libdir=/%{_lib}
+%else
 %configure
+%endif
 make  %{?_smp_mflags}
 
 %install
+rm -Rf %{buildroot}
 make install DESTDIR=%{buildroot} INSTALL="install -p"
 mkdir -p %{buildroot}/%{_sysconfdir}
 install -m 644 securepass.conf.template %{buildroot}/etc/securepass.conf
 
+%clean
+[ "%{buildroot}" != "/" ] && rm -rf %{buildroot}
 
 %files
+%defattr(-,root,root)
+
+%if 0%{?rhel} <= 6
+/%{_lib}/*.so*
+/%{_lib}/security/*.so*
+%else
 %{_libdir}/*.so*
-%attr(0600,root,root) %config(noreplace) /etc/securepass.conf
+%{_libdir}/security/*.so*
+%endif
+
+%config(noreplace) /etc/securepass.conf
 %doc README.md
 %doc securepass.conf.template
 
@@ -42,8 +60,18 @@ install -m 644 securepass.conf.template %{buildroot}/etc/securepass.conf
 %postun -p /sbin/ldconfig
 
 %changelog
-* Wed Feb 11 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.2-6
-* Sync'ed SPEC with upstream
+* Fri Sep 4 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.4-0
+- Aligned with upstream release
+- Fixed different lib schema between RHEL/CentOS 6 and below and 7
+
+* Sun Aug 16 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.3-2
+- Fixes in buildrequires
+
+* Tue Aug 11 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.3-1
+- Updated 0.3 to have PAM
+
+* Wed Feb 11 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.2.2-1
+- Sync'ed SPEC with upstream
 
 * Tue Feb 10 2015 Giuseppe Paterno' <gpaterno@gpaterno.com> 0.2-5
 - Changed to tags in RPM, following now tags upstream
