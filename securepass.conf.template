@@ -1,8 +1,19 @@
 #/etc/securepass.conf
 #
-# debug: writes to syslog - 0 ==> no debug, from 1 to 4 ==> debug level
-# debug_stderr: writes to stderr - 0 ==> no debug, from 1 to 4 ==> debug level
 # Mandatory parameters: app_id, app_secret, endpoint, default_realm
+#
+# Debug option must be used with care as it impacts *all* the processes within the system.
+# Use this option only when in multi-user mode and strictly for debugging purposes.
+# Don't reboot the system with the debug option enabled
+#
+# debug: writes to syslog
+# debug_stderr: writes to stderr
+# Debug levels:
+# 0 --> no debug
+# 1 --> errors
+# 2 --> at function enter + main facts
+# 3 --> more detail
+# 4 --> JSON processing
 #
 [default]
 #debug = 0
