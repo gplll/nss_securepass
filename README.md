@@ -14,6 +14,7 @@ To install and configure the modules:
 - Copy file securepass.conf.template into /etc/securepass.conf (uid=root, gid=root, perms=600)
 - See the instructions into the file to configure the module
 - Edit file /etc/nssswitch.conf and add service 'sp' to the passwd line (e.g. 'passwd: compat sp')
+- Edit file /etc/nssswitch.conf and add service 'sp' to the group line (e.g. 'group: compat sp')
 - (recommended) start nscd (Name Service Cache Daemon)
 - Configure PAM module (/lib/security/pam_sp_auth.so) under /etc/pam.d 
 - This repo includes the following sample programs to test the SecurePass, NSS and PAM APIs: 
@@ -55,4 +56,4 @@ auth       required   /lib/security/pam_sp.so
 ```
 
 # Author
-gplll1818@gmail.com, Oct 2014 - Aug 2015
+gplll1818@gmail.com, Oct 2014 - Feb 2017

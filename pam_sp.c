@@ -54,8 +54,8 @@
 #include "pam_sp.h"
 
 #define SP_INIT \
-    if ((sp_config.status != SP_INITED)) { \
-        if (!(sp_init ())) return PAM_SERVICE_ERR; \
+    if (sp_config.status != SP_INITED) { \
+        if (sp_init () == -1) return PAM_SERVICE_ERR; \
     }
 
 #undef PAM_FAIL_CHECK
@@ -302,12 +302,12 @@ PAM_EXTERN int pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const c
 
 		/* call securepass API */
  		if (sp_user_auth_p (user, password) == -1) {
-            debug (4, "old password for user %s is wrong\n", user);
+            debug (3, "old password for user %s is wrong\n", user);
 			_pam_forget(password);
 			retval = PAM_PERM_DENIED;
 			goto error;
         } else {
-            debug (4, "old password for user %s is correct\n", user);
+            debug (3, "old password for user %s is correct\n", user);
         }
 
 		/*
@@ -379,11 +379,11 @@ PAM_EXTERN int pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const c
 
 		/* call SP API to change the passwd */
  		if (sp_user_password_change_p (user, new_password) == -1) {
-            debug (4, "can't set new password for user %s\n", user);
+            debug (3, "can't set new password for user %s\n", user);
 			retval = PAM_AUTHTOK_ERR;
 			goto error;
         } else {
-            debug (4, "new password for user %s has been set\n", user);
+            debug (3, "new password for user %s has been set\n", user);
         }
 	}
 

@@ -1,6 +1,6 @@
 /*
  *
- * Author: gplll <gplll1818@gmail.com>, Oct 2014
+ * Author: gplll <gplll1818@gmail.com>, Oct 2014 - Feb 2017
  *  
  */
 
@@ -13,22 +13,31 @@
 
 char *realm = NULL;
 char *user = NULL;
+char *group = NULL;
+char *groupm = NULL;
 char *xattrs_user = NULL;
 char *app = NULL;
 int list_users = 0;
+int verbose = 0;
 char *user_pwd = NULL;
 char *user_secret = NULL;
 
 void get_options (int argc, char *argv[]) 
 {
 	int opt;
-	while ((opt = getopt(argc, argv, "hr:u:x:a:lw:t:")) != -1) {
+	while ((opt = getopt(argc, argv, "hvr:u:g:x:m:a:lw:t:")) != -1) {
                switch (opt) {
                case 'r':
                    realm = optarg;
                    break;
                case 'u':
                    user = optarg;
+                   break;
+               case 'g':
+                   group = optarg;
+                   break;
+               case 'm':
+                   groupm = optarg;
                    break;
                case 'x':
                    xattrs_user = optarg;
@@ -45,16 +54,22 @@ void get_options (int argc, char *argv[])
                case 't':
 				   user_secret = optarg;
                    break;
+               case 'v':
+				   verbose = 1;
+                   break;
 				case 'h':
                default: /* '?' */
-                   fprintf(stderr, "Usage: %s [-r realm] [-u user] [-x user] [-a application] [-l] [-w 'user password'] [-t 'user secret'] [-h]\n", argv[0]);
+                   fprintf(stderr, "Usage: %s [-r realm] [-u user] [-x user] [-g group] [-m group] [-a application] [-l] [-w 'user password'] [-t 'user secret'] [-v] [-h]\n", argv[0]);
                    fprintf(stderr, "       -r: apply to specified realm\n");
                    fprintf(stderr, "       -u: get user info\n");
                    fprintf(stderr, "       -x: get user xattrs\n");
+                   fprintf(stderr, "       -g: get group xattrs\n");
+                   fprintf(stderr, "       -m: get group members\n");
                    fprintf(stderr, "       -a: get application info\n");
-                   fprintf(stderr, "       -l: get list of users\n");
+                   fprintf(stderr, "       -l: get list of users and groups\n");
                    fprintf(stderr, "       -w: set user password\n");
                    fprintf(stderr, "       -t: authenticate user (secret is the concatenation of OTP and pwd)\n");
+                   fprintf(stderr, "       -v: display usage\n");
                    fprintf(stderr, "       -h: display usage\n");
                    exit(0);
                }
@@ -62,39 +77,52 @@ void get_options (int argc, char *argv[])
 }
 
 void get_user_info (char *user) {
-	sp_user_info_t *user_info;
+	sp_users_info_t *user_info;
 
-		if (sp_user_info (&user_info, user) == -1) {
-			printf ("sp_user_info() returned error\n");
+		if (sp_users_info (&user_info, user) == -1) {
+			printf ("sp_users_info() returned error\n");
 		} else {
 			/* print user */
-			printf ("nin =%s\n", user_info->nin);
-			printf ("name =%s\n", user_info->name);
-			printf ("surname =%s\n", user_info->surname);
-			printf ("mobile =%s\n", user_info->mobile);
-			printf ("rfid =%s\n", user_info->rfid);
-			printf ("enabled =%s\n", user_info->enabled);
-			printf ("token =%s\n", user_info->token);
-			printf ("manager =%s\n", user_info->manager);
-			printf ("password =%s\n", user_info->password);
-			printf ("email =%s\n", user_info->email);
+			printf ("nin = %s\n", user_info->nin);
+			printf ("name = %s\n", user_info->name);
+			printf ("surname = %s\n", user_info->surname);
+			printf ("mobile = %s\n", user_info->mobile);
+			printf ("rfid = %s\n", user_info->rfid);
+			printf ("enabled = %s\n", user_info->enabled);
+			printf ("token = %s\n", user_info->token);
+			printf ("manager = %s\n", user_info->manager);
+			printf ("password = %s\n", user_info->password);
+			printf ("email = %s\n", user_info->email);
 			free (user_info);
 		}
 }
 
 void get_xattrs (char *user) {
 
-	sp_xattrs_t *xattrs;
+	sp_users_xattrs_t *xattrs;
 
-	if (sp_xattrs (&xattrs, user, 0) == -1) {
-		printf ("sp_xattrs() returned error\n");
+	if (sp_users_xattrs (&xattrs, user, 0) == -1) {
+		printf ("sp_users_xattrs() returned error\n");
 	} else {
 		/* print xattrs */
-		printf ("posixuid =%s\n", xattrs->posixuid);
-		printf ("posixgid =%s\n", xattrs->posixgid);
-		printf ("posixhomedir =%s\n", xattrs->posixhomedir);
-		printf ("posixshell =%s\n", xattrs->posixshell);
-		printf ("posixgecos =%s\n", xattrs->posixgecos);
+		printf ("posixuid = %s\n", xattrs->posixuid);
+		printf ("posixgid = %s\n", xattrs->posixgid);
+		printf ("posixhomedir = %s\n", xattrs->posixhomedir);
+		printf ("posixshell = %s\n", xattrs->posixshell);
+		printf ("posixgecos = %s\n", xattrs->posixgecos);
+		free (xattrs);
+	}
+}
+
+void get_group_info (char *group) {
+
+	sp_groups_xattrs_t *xattrs;
+
+	if (sp_groups_xattrs (&xattrs, group) == -1) {
+		printf ("sp_groups_xattrs() returned error\n");
+	} else {
+		/* print xattrs */
+		printf ("posixgid = %s\n", xattrs->posixgid);
 		free (xattrs);
 	}
 }
@@ -130,7 +158,7 @@ void user_auth (char *user_secret) {
 }
 
 int main(int argc, char *argv[]) {
-	char **user_list;
+	char **user_list, **group_list;
 	int len, i;
 
 	get_options(argc, argv);
@@ -140,20 +168,49 @@ int main(int argc, char *argv[]) {
 	if (xattrs_user) {
 		get_xattrs (xattrs_user);
 	} 
-	if (app) {
+	if (group) {
+		get_group_info (group);
 	} 
-	if (list_users) {
-		len = sp_list_users (&user_list, realm);
+	if (groupm) {
+		len = sp_groups_members_list (&user_list, groupm, realm);
 		if (len == -1) {
-			printf ("sp_list_users() returned error\n");
+			printf ("sp_group_members_list() returned error\n");
 		} else {
 			/* print list of users */
 			for (i=0; i<len; i++) {
-				printf ("\nUSERNAME = %s\n", *(user_list + i));
-				get_user_info (*(user_list + i)); 
-				get_xattrs (*(user_list + i)); 
+				printf ("USER: %s\n", *(user_list + i));
 			}
 			free (user_list);
+		}
+	} 
+	if (app) {
+			printf ("-a option is not yet implemented\n");
+	} 
+	if (list_users) {
+		len = sp_users_list (&user_list, realm);
+		if (len == -1) {
+			printf ("sp_users_list() returned error\n");
+		} else {
+			/* print list of users */
+			for (i=0; i<len; i++) {
+				printf ("USER: %s\n", *(user_list + i));
+				if (verbose) {
+					get_user_info (*(user_list + i)); 
+					get_xattrs (*(user_list + i)); 
+					printf ("\n");
+				}
+			}
+			free (user_list);
+		}
+		len = sp_groups_list (&group_list, realm);
+		if (len == -1) {
+			printf ("\nsp_groups_list() returned error\n");
+		} else {
+			/* print list of groups */
+			for (i=0; i<len; i++) {
+				printf ("GROUP: %s\n", *(group_list + i));
+			}
+			free (group_list);
 		}
 	}		
 	if (user_pwd) {
